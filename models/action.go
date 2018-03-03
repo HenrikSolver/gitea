@@ -554,8 +554,10 @@ func CommitRepoAction(opts CommitRepoActionOptions) error {
 			opts.Commits.CompareURL = repo.ComposeCompareURL(opts.OldCommitID, opts.NewCommitID)
 		}
 
-		if err = UpdateIssuesCommit(pusher, repo, opts.Commits.Commits); err != nil {
-			log.Error(4, "updateIssuesCommit: %v", err)
+		if git.BranchPrefix+repo.DefaultBranch == opts.RefFullName {
+			if err = UpdateIssuesCommit(pusher, repo, opts.Commits.Commits); err != nil {
+				log.Error(4, "updateIssuesCommit: %v", err)
+			}
 		}
 	}
 

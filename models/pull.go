@@ -443,6 +443,17 @@ func (pr *PullRequest) Merge(doer *User, baseGitRepo *git.Repository, mergeStyle
 		log.Error(4, "setMerged [%d]: %v", pr.ID, err)
 	}
 
+	fmt.Printf("PR: \n%+v\n", pr)
+	fmt.Printf("ISSUE: \n%+v\n", pr.Issue)
+	fmt.Printf("HeadBranch: \n%+v\n", pr.HeadBranch)
+	fmt.Printf("BaseBranch: \n%+v\n", pr.BaseBranch)
+	fmt.Printf("HeadRepo: \n%+v\n", pr.HeadRepo)
+	fmt.Printf("BaseRepo: \n%+v\n", pr.BaseRepo)
+
+	if pr.BaseBranch == pr.BaseRepo.DefaultBranch {
+		fmt.Print("Merge into default branch\n")
+	}
+
 	if err = MergePullRequestAction(doer, pr.Issue.Repo, pr.Issue); err != nil {
 		log.Error(4, "MergePullRequestAction [%d]: %v", pr.ID, err)
 	}
@@ -724,6 +735,20 @@ func NewPullRequest(repo *Repository, pull *Issue, labelIDs []int64, uuids []str
 	if err = sess.Begin(); err != nil {
 		return err
 	}
+
+	b, err := repo.GetBranch(pr.BaseBranch)
+	if err != nil {
+		log.Info("Could not get branch\n")
+	} else {
+		cmts, err := b.GetCommit()
+		if err == nil {
+			fmt.Printf("Commits %v", cmts)
+		} else {
+			log.Info("Could not get the commits\n")
+		}
+	}
+
+	pull.Content = pull.Content + "\n\nDetta har jag lagt till"
 
 	if err = newIssue(sess, pull.Poster, NewIssueOptions{
 		Repo:        repo,
